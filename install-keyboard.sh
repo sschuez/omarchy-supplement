@@ -17,3 +17,9 @@ fi
 "${FCITX[@]}" SetInputMethodGroupInfo 'ssa(ss)' Default us-intl 1 keyboard-us-intl ""
 "${FCITX[@]}" Save
 echo "fcitx5 set to US International"
+
+# Its keyboard engine grabs Ctrl+Alt+H / Ctrl+Alt+J for word-completion hints,
+# which Herdr uses to move between panes. Clear both (an empty key list).
+"${FCITX[@]}" SetConfig sv "fcitx://config/addon/keyboard" "a{sv}" 2 \
+  "Hint Trigger" "a{sv}" 0 "One Time Hint Trigger" "a{sv}" 0
+echo "fcitx5 completion hotkeys cleared"
