@@ -31,3 +31,11 @@ add_line "$HOME/.config/hypr/hyprland.lua" "$HYPR_LINE" '--'
 
 # Apply the Hyprland changes right away (does nothing if Hyprland isn't running)
 hyprctl reload >/dev/null 2>&1 || true
+
+# XCompose: Windows-style dead keys (I'm, not Iḿ), loaded after Omarchy's rules
+add_line "$HOME/.XCompose" 'include "%H/.config/xcompose/dead-keys"'
+omarchy restart xcompose >/dev/null 2>&1 || true
+
+# tmux: load personal overrides at the end of Omarchy's tmux.conf
+add_line "$HOME/.config/tmux/tmux.conf" 'source-file -q ~/.config/tmux/overrides.conf'
+tmux source-file ~/.config/tmux/tmux.conf >/dev/null 2>&1 || true
