@@ -5,7 +5,7 @@ set -e
 
 REPO_URL="https://github.com/sschuez/omarchy-dotfiles.git"
 REPO_DIR="$HOME/Code/omarchy-dotfiles"
-PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr)   # add more as you create them
+PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr bin)   # add more as you create them
 
 # Files we own outright instead of overlaying (relative to ~). Omarchy ships its
 # own copy, and Stow won't replace a real file, so it's moved aside first.
@@ -33,6 +33,10 @@ for file in "${OWNED_FILES[@]}"; do
     mv "$target" "$target.bak.$(date +%s)"
   fi
 done
+
+# Stow links a whole folder when it doesn't exist yet; ~/.local/bin is shared
+# with other tools, so it must be a real folder.
+mkdir -p "$HOME/.local/bin"
 
 for package in "${PACKAGES[@]}"; do
   echo "Stowing $package"

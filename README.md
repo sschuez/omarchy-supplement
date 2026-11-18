@@ -58,6 +58,13 @@ The include lines `install-overrides.sh` adds:
 | `~/.XCompose` | `include "%H/.config/xcompose/dead-keys"` | Dead-key rules |
 | `~/.config/tmux/tmux.conf` | `source-file -q ~/.config/tmux/overrides.conf` | tmux overrides |
 
+`install-overrides.sh` also merges two hooks into Claude Code's
+`~/.claude/settings.json` (Claude Code writes that file itself, so it can't be
+owned): `WorktreeCreate` and `WorktreeRemove` call `wt hook create|remove`
+(from omarchy-dotfiles), so `claude --worktree <name>` gets its own ports,
+Docker project and databases, and removing it at the exit prompt cleans all of
+that up. It also enables the cloned workspaces bar widget.
+
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
 loads `~/.config/nvim/plugin/`, and Omarchy reads
@@ -65,8 +72,9 @@ loads `~/.config/nvim/plugin/`, and Omarchy reads
 
 A few files can't be overlaid, so the dotfiles own them outright. They're
 listed in `OWNED_FILES` in `install-dotfiles.sh`, which moves Omarchy's copy
-aside (`*.bak.<timestamp>`) before linking. Currently just
-`~/.config/nvim/lazyvim.json`: LazyVim only accepts extras from there.
+aside (`*.bak.<timestamp>`) before linking. Currently
+`~/.config/nvim/lazyvim.json` (LazyVim only accepts extras from there) and
+`~/.config/herdr/config.toml` (Herdr can't include other files).
 
 ## Adding things
 

@@ -44,3 +44,19 @@ tmux source-file ~/.config/tmux/tmux.conf >/dev/null 2>&1 || true
 # It replaces the built-in omarchy.workspaces; needs the shell running.
 omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
 omarchy plugin enable stephen.workspaces >/dev/null 2>&1 || true
+
+# Claude Code: create and remove worktrees through `wt` (omarchy-dotfiles), so
+# `claude --worktree <name>` gets project setup and full cleanup. Claude Code
+# writes settings.json itself, so merge the two hooks in rather than own it.
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
+[ -f "$CLAUDE_SETTINGS" ] || echo '{}' >"$CLAUDE_SETTINGS"
+tmp=$(mktemp)
+jq '.hooks.WorktreeCreate = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook create"}]}]
+  | .hooks.WorktreeRemove = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook remove"}]}]' \
+  "$CLAUDE_SETTINGS" >"$tmp"
+if cmp -s "$tmp" "$CLAUDE_SETTINGS"; then
+  echo "Already set up: $CLAUDE_SETTINGS"; rm "$tmp"
+else
+  cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Added worktree hooks to $CLAUDE_SETTINGS"
+fi
