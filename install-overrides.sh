@@ -39,3 +39,8 @@ omarchy restart xcompose >/dev/null 2>&1 || true
 # tmux: load personal overrides at the end of Omarchy's tmux.conf
 add_line "$HOME/.config/tmux/tmux.conf" 'source-file -q ~/.config/tmux/overrides.conf'
 tmux source-file ~/.config/tmux/tmux.conf >/dev/null 2>&1 || true
+
+# Omarchy bar: use my copy of the workspaces widget (shows all ten workspaces).
+# It replaces the built-in omarchy.workspaces; needs the shell running.
+omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
+omarchy plugin enable stephen.workspaces >/dev/null 2>&1 || true

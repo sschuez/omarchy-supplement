@@ -5,12 +5,13 @@ set -e
 
 REPO_URL="https://github.com/sschuez/omarchy-dotfiles.git"
 REPO_DIR="$HOME/Code/omarchy-dotfiles"
-PACKAGES=(bash hypr omarchy xcompose tmux nvim mise)   # add more as you create them
+PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr)   # add more as you create them
 
 # Files we own outright instead of overlaying (relative to ~). Omarchy ships its
 # own copy, and Stow won't replace a real file, so it's moved aside first.
 OWNED_FILES=(
   .config/nvim/lazyvim.json   # LazyVim extras; edit with :LazyExtras
+  .config/herdr/config.toml   # Herdr has no include mechanism
 )
 
 # Make sure Stow is installed (reuses install-stow.sh; does nothing if already there)
