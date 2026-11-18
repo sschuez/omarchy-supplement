@@ -12,3 +12,4 @@ bash ./install-stow.sh
 # dotfiles and overrides
 bash ./install-dotfiles.sh
 bash ./install-overrides.sh
+bash ./install-keyboard.sh
