@@ -12,17 +12,27 @@ installs and wires them up.
 
 1. Install Omarchy. Any keyboard layout is fine: US International is set by
    these scripts, because Omarchy's installer doesn't offer it.
-2. Log in to the desktop, open a terminal and run:
+2. Log in to the desktop, open a terminal and run the following. It asks for
+   your password once (packages, Docker, the Postgres container) and for
+   1Password approval if a step needs it:
 
    ```sh
    git clone https://github.com/sschuez/omarchy-supplement ~/Code/omarchy-supplement
    ~/Code/omarchy-supplement/install-all.sh
    ```
 
-3. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
+3. Per project, restore the secrets that aren't in git from 1Password, e.g.
+   submissio's Rails key:
+   `op read "op://Shared/Rails Master Key (Production)/password" --account submissioag.1password.com > config/master.key`.
+   New worktrees copy it from the main checkout automatically.
+4. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
    (Neovim's Ruby language server). Install it once in each:
    `mise exec ruby@<version> -- gem install ruby-lsp`. Rubies mise installs
    later get it automatically (see `~/.default-gems` in omarchy-dotfiles).
+5. Optional: to run whole Docker stacks (`dcu`, `dcr`) without `sudo`, enable
+   Omarchy's sudoless Docker (Setup > Security > Sudoless Docker, then reboot).
+   It makes the `docker` group root-equivalent, which is why Omarchy leaves it
+   off. Host development only needs the Postgres container this sets up.
 
 Every script is idempotent: running it again changes nothing that's already
 set up. Re-run `install-all.sh` any time, for example after `omarchy refresh`

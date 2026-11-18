@@ -1,7 +1,11 @@
 #!/bin/bash
 
-# Add include lines to Omarchy's config files so they load our overrides.
-# Each line is only added if it isn't there yet, so this is safe to re-run.
+# Hook omarchy-dotfiles into Omarchy and Claude Code, without owning their files:
+# - one include line per Omarchy config file (bash, Hyprland, XCompose, tmux),
+#   added only if it isn't there yet
+# - the cloned workspaces widget switched on in Omarchy's bar
+# - Claude Code hooks merged into ~/.claude/settings.json
+# Safe to re-run.
 set -e
 
 add_line() {
