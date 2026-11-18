@@ -34,9 +34,17 @@ for file in "${OWNED_FILES[@]}"; do
   fi
 done
 
-# Stow links a whole folder when it doesn't exist yet; ~/.local/bin is shared
-# with other tools, so it must be a real folder.
-mkdir -p "$HOME/.local/bin"
+# Stow links a whole folder when it doesn't exist yet. These must be real
+# folders with only the files inside linked: ~/.local/bin is shared with other
+# tools, and Omarchy's shell only loads plugins from real folders.
+REAL_DIRS=(
+  .local/bin
+  .config/omarchy/plugins/stephen.workspaces
+)
+for dir in "${REAL_DIRS[@]}"; do
+  [ -L "$HOME/$dir" ] && rm "$HOME/$dir" # a folder link from an earlier run
+  mkdir -p "$HOME/$dir"
+done
 
 for package in "${PACKAGES[@]}"; do
   echo "Stowing $package"
