@@ -9,6 +9,7 @@ cd "$(dirname "$0")"  # run from this repo's folder, wherever we're called from
 # Programs (order matters: Stow must exist before the dotfiles step)
 bash ./install-stow.sh
 bash ./install-postgres.sh
+bash ./install-1password-cli.sh
 
 # dotfiles and overrides
 bash ./install-dotfiles.sh
