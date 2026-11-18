@@ -34,6 +34,7 @@ has reset a config file and dropped an include line.
 |---|---|
 | `install-all.sh` | Runs everything below, in order. Stops at the first error. |
 | `install-stow.sh` | Installs GNU Stow. |
+| `install-postgres.sh` | PostgreSQL 18 for development, the Omarchy way: `omarchy install docker dbs` runs it in a container on `localhost:5432` (user `postgres`). Also starts Docker at boot, so the database is back after every reboot. Needs `sudo`. |
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
 | `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
@@ -63,7 +64,9 @@ The include lines `install-overrides.sh` adds:
 owned): `WorktreeCreate` and `WorktreeRemove` call `wt hook create|remove`
 (from omarchy-dotfiles), so `claude --worktree <name>` gets its own ports,
 Docker project and databases, and removing it at the exit prompt cleans all of
-that up. It also enables the cloned workspaces bar widget.
+that up. It also adds two `PreToolUse` safety hooks from omarchy-dotfiles (no
+bare `bin/ci` on protected branches, no destructive database commands), keeping
+any other `PreToolUse` hooks, and enables the cloned workspaces bar widget.
 
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim

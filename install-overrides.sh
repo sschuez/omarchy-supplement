@@ -45,18 +45,27 @@ tmux source-file ~/.config/tmux/tmux.conf >/dev/null 2>&1 || true
 omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
 omarchy plugin enable stephen.workspaces >/dev/null 2>&1 || true
 
-# Claude Code: create and remove worktrees through `wt` (omarchy-dotfiles), so
-# `claude --worktree <name>` gets project setup and full cleanup. Claude Code
-# writes settings.json itself, so merge the two hooks in rather than own it.
+# Claude Code hooks. Claude Code writes settings.json itself, so merge them in
+# rather than own the file:
+# - WorktreeCreate/WorktreeRemove go through `wt` (omarchy-dotfiles), so
+#   `claude --worktree <name>` gets its own ports and databases, and full cleanup
+# - PreToolUse safety hooks (~/.claude/hooks, claude package): no bare bin/ci on
+#   protected branches, no destructive database commands. Other PreToolUse
+#   hooks are kept.
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
 [ -f "$CLAUDE_SETTINGS" ] || echo '{}' >"$CLAUDE_SETTINGS"
 tmp=$(mktemp)
 jq '.hooks.WorktreeCreate = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook create"}]}]
-  | .hooks.WorktreeRemove = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook remove"}]}]' \
+  | .hooks.WorktreeRemove = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook remove"}]}]
+  | .hooks.PreToolUse = ((.hooks.PreToolUse // [])
+      | map(select([.hooks[]?.command] | any(test("/\\.claude/hooks/block-")) | not)))
+    + [{"matcher": "Bash", "hooks": [
+        {"type": "command", "command": "$HOME/.claude/hooks/block-bin-ci-on-protected.sh"},
+        {"type": "command", "command": "$HOME/.claude/hooks/block-destructive-db.sh"}]}]' \
   "$CLAUDE_SETTINGS" >"$tmp"
 if cmp -s "$tmp" "$CLAUDE_SETTINGS"; then
   echo "Already set up: $CLAUDE_SETTINGS"; rm "$tmp"
 else
-  cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Added worktree hooks to $CLAUDE_SETTINGS"
+  cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Updated Claude Code hooks in $CLAUDE_SETTINGS"
 fi
