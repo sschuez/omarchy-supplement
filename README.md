@@ -79,6 +79,12 @@ that up. It also adds two `PreToolUse` safety hooks from omarchy-dotfiles (no
 bare `bin/ci` on protected branches, no destructive database commands), keeping
 any other `PreToolUse` hooks, and enables the cloned workspaces bar widget.
 
+Last, it installs my [Window Overview](https://github.com/sschuez/omarchy-window-overview)
+shell plugin (`Super+E`, `Alt+Tab`) with `omarchy plugin add` and enables it.
+The plugin lives in its own repo; its keys are in omarchy-dotfiles' Hyprland
+overrides. A copy that is already there is left alone, and a failed download
+doesn't stop the script: run it again.
+
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
 loads `~/.config/nvim/plugin/`, and Omarchy reads

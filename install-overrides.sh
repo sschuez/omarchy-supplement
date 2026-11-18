@@ -3,7 +3,8 @@
 # Hook omarchy-dotfiles into Omarchy and Claude Code, without owning their files:
 # - one include line per Omarchy config file (bash, Hyprland, XCompose, tmux),
 #   added only if it isn't there yet
-# - the cloned workspaces widget switched on in Omarchy's bar
+# - the cloned workspaces widget switched on in Omarchy's bar, and my Window
+#   Overview plugin installed from its own repo
 # - Claude Code hooks merged into ~/.claude/settings.json
 # Safe to re-run.
 set -e
@@ -48,6 +49,20 @@ tmux source-file ~/.config/tmux/tmux.conf >/dev/null 2>&1 || true
 # It replaces the built-in omarchy.workspaces; needs the shell running.
 omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true
 omarchy plugin enable stephen.workspaces >/dev/null 2>&1 || true
+
+# Window Overview and its Alt+Tab switcher (keys are in the Hyprland overrides):
+# my own plugin, fetched from its own repo. A copy that is already there,
+# installed or linked for development, is left alone and only switched on.
+# A failure here (offline, shell not running) doesn't stop the rest of this
+# script; run it again later.
+WINDOW_OVERVIEW="io.github.sschuez.window-overview"
+if [ -e "$HOME/.config/omarchy/plugins/$WINDOW_OVERVIEW" ]; then
+  omarchy plugin enable "$WINDOW_OVERVIEW" >/dev/null 2>&1 || true
+  echo "Already set up: $WINDOW_OVERVIEW"
+else
+  omarchy plugin add https://github.com/sschuez/omarchy-window-overview --enable --yes ||
+    echo "Could not install $WINDOW_OVERVIEW; run this script again" >&2
+fi
 
 # Claude Code hooks. Claude Code writes settings.json itself, so merge them in
 # rather than own the file:
