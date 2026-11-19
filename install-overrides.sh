@@ -6,7 +6,8 @@
 # - the cloned workspaces widget switched on in Omarchy's bar, my Window
 #   Overview plugin installed from its own repo, and the AirPods plugin with
 #   its daemon
-# - my Herdr navigate plugin (Ctrl+h/j/k/l) registered with Herdr
+# - my Herdr navigate plugin (Ctrl+h/j/k/l) registered with Herdr, and the
+#   community tab-naming plugin installed at a pinned version
 # - Claude Code hooks merged into ~/.claude/settings.json, and its fullscreen
 #   renderer switched off
 # Safe to re-run.
@@ -107,6 +108,33 @@ elif herdr_output=$(herdr plugin link "$HERDR_NAVIGATE_DIR" 2>&1) &&
 else
   echo "Could not link the Herdr plugin $HERDR_NAVIGATE; run this script again. Herdr said:" >&2
   echo "$herdr_output" >&2
+fi
+
+# Herdr: tab names like tmux's automatic-rename ("[1] nvim", or the task an
+# agent is on), from the community plugin qu8n/herdr-automatic-rename. A
+# plugin runs as me, so it's pinned to a version whose source I read through:
+# to move on, read what changed, bump HERDR_RENAME_REF and run this again.
+# Its settings (~/.config/herdr-automatic-rename/config.sh) and its shell hook
+# (end of ~/.config/bash/aliases) come with omarchy-dotfiles; open a new
+# terminal for the hook. Needs the network the first time. Failures here don't
+# stop the rest of this script.
+HERDR_RENAME="herdr-automatic-rename"
+HERDR_RENAME_REPO="qu8n/herdr-automatic-rename"
+HERDR_RENAME_REF="v0.15.0"
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "Herdr isn't installed; skipping its $HERDR_RENAME plugin"
+else
+  herdr_installed=$(herdr plugin list --json 2>/dev/null |
+    jq -r --arg id "$HERDR_RENAME" '.result.plugins[]? | select(.plugin_id == $id) | .version' 2>/dev/null)
+  if [ "v$herdr_installed" = "$HERDR_RENAME_REF" ]; then
+    herdr plugin enable "$HERDR_RENAME" >/dev/null 2>&1 || true
+    echo "Already set up: Herdr plugin $HERDR_RENAME $HERDR_RENAME_REF"
+  elif herdr_output=$(herdr plugin install "$HERDR_RENAME_REPO" --ref "$HERDR_RENAME_REF" --yes 2>&1); then
+    echo "Installed: Herdr plugin $HERDR_RENAME $HERDR_RENAME_REF"
+  else
+    echo "Could not install the Herdr plugin $HERDR_RENAME; run this script again. Herdr said:" >&2
+    echo "$herdr_output" >&2
+  fi
 fi
 
 # Claude Code hooks. Claude Code writes settings.json itself, so merge them in

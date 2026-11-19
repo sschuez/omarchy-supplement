@@ -116,6 +116,16 @@ but Herdr only runs a plugin once it's linked; until then the keys do nothing.
 Linking is repeated on every run, which also repairs a link after the dotfiles
 folder has moved, and a failure doesn't stop the script.
 
+Then it installs the community plugin
+[herdr-automatic-rename](https://github.com/qu8n/herdr-automatic-rename), which
+names Herdr tabs like tmux's automatic-rename (`[1] nvim`, or the task an agent
+is on). A plugin runs as me, so it is pinned to a version whose source was read
+through (`HERDR_RENAME_REF` in the script): to move on, read what changed, bump
+the version and run the script again. Its settings and its shell hook come with
+omarchy-dotfiles (`~/.config/herdr-automatic-rename/config.sh` and the end of
+`~/.config/bash/aliases`); open a new terminal for the hook. It needs the
+network the first time, and a failure doesn't stop the script.
+
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
 loads `~/.config/nvim/plugin/`, and Omarchy reads
