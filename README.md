@@ -33,6 +33,13 @@ installs and wires them up.
    Omarchy's sudoless Docker (Setup > Security > Sudoless Docker, then reboot).
    It makes the `docker` group root-equivalent, which is why Omarchy leaves it
    off. Host development only needs the Postgres container this sets up.
+6. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
+   panel picks up one of their rotating Bluetooth LE addresses, which connects
+   without audio or AirPods controls. Run `bluetoothctl`, then `scan bredr`,
+   put the AirPods in pairing mode (Pro 3: lid open, double-tap the front of
+   the case until the light flashes white), and `pair`, `trust` and `connect`
+   the entry with a fixed address (the one not named like `6F-9B-…`). The
+   AirPods widget appears in the bar once they're connected.
 
 Every script is idempotent: running it again changes nothing that's already
 set up. Re-run `install-all.sh` any time, for example after `omarchy refresh`
