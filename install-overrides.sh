@@ -6,6 +6,7 @@
 # - the cloned workspaces widget switched on in Omarchy's bar, my Window
 #   Overview plugin installed from its own repo, and the AirPods plugin with
 #   its daemon
+# - my Herdr navigate plugin (Ctrl+h/j/k/l) registered with Herdr
 # - Claude Code hooks merged into ~/.claude/settings.json, and its fullscreen
 #   renderer switched off
 # Safe to re-run.
@@ -84,6 +85,28 @@ fi
 if [ -x "$AIRPODS_DIR/setup" ] && [ ! -x "$HOME/.local/bin/librepods" ]; then
   "$AIRPODS_DIR/setup" ||
     echo "Could not build the AirPods daemon; run $AIRPODS_DIR/setup" >&2
+fi
+
+# Herdr: Ctrl+h/j/k/l across panes and Neovim splits, like tmux. The keys are
+# in Herdr's config.toml and the plugin's files come with the herdr dotfiles
+# package, but Herdr only runs a plugin once it's linked; until then the keys
+# do nothing. Linking works without Herdr running and is safe to repeat (it
+# also repairs a link to a folder that has moved). Failures here don't stop
+# the rest of this script.
+HERDR_NAVIGATE="stephen.navigate"
+HERDR_NAVIGATE_DIR="$HOME/.config/herdr/navigate-plugin"
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "Herdr isn't installed; skipping its $HERDR_NAVIGATE plugin"
+elif [ ! -f "$HERDR_NAVIGATE_DIR/herdr-plugin.toml" ]; then
+  echo "Missing $HERDR_NAVIGATE_DIR; run install-dotfiles.sh, then this script again" >&2
+elif herdr_output=$(herdr plugin link "$HERDR_NAVIGATE_DIR" 2>&1) &&
+  herdr_output=$(herdr plugin list 2>&1) &&
+  grep -qF -- "- $HERDR_NAVIGATE " <<<"$herdr_output"; then
+  herdr plugin enable "$HERDR_NAVIGATE" >/dev/null 2>&1 || true
+  echo "Linked: Herdr plugin $HERDR_NAVIGATE"
+else
+  echo "Could not link the Herdr plugin $HERDR_NAVIGATE; run this script again. Herdr said:" >&2
+  echo "$herdr_output" >&2
 fi
 
 # Claude Code hooks. Claude Code writes settings.json itself, so merge them in

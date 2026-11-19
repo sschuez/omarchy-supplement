@@ -54,7 +54,7 @@ has reset a config file and dropped an include line.
 | `install-postgres.sh` | PostgreSQL 18 for development, the Omarchy way: `omarchy install docker dbs` runs it in a container on `localhost:5432` (user `postgres`). Also starts Docker at boot, so the database is back after every reboot. Needs `sudo`. |
 | `install-1password-cli.sh` | 1Password CLI (`op`), for secrets such as Rails master keys. Omarchy packages it. |
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
-| `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides. |
+| `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides, and sets up the plugins and Claude Code hooks described below. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
 
 ## How the overrides work
@@ -104,6 +104,13 @@ After `omarchy plugin update io.github.thisisgm.omapods`, run
 `~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup` again so the
 daemon matches.
 
+And it links my Herdr navigate plugin (`Ctrl+h/j/k/l` across panes and Neovim
+splits, like tmux) with `herdr plugin link ~/.config/herdr/navigate-plugin`.
+The plugin's files and its keys come with omarchy-dotfiles' `herdr` package,
+but Herdr only runs a plugin once it's linked; until then the keys do nothing.
+Linking is repeated on every run, which also repairs a link after the dotfiles
+folder has moved, and a failure doesn't stop the script.
+
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
 loads `~/.config/nvim/plugin/`, and Omarchy reads
@@ -114,6 +121,12 @@ listed in `OWNED_FILES` in `install-dotfiles.sh`, which moves Omarchy's copy
 aside (`*.bak.<timestamp>`) before linking. Currently
 `~/.config/nvim/lazyvim.json` (LazyVim only accepts extras from there) and
 `~/.config/herdr/config.toml` (Herdr can't include other files).
+
+Stow links a whole folder when the folder doesn't exist yet, which is wrong for
+folders other programs write into. `REAL_DIRS` in `install-dotfiles.sh` lists
+the ones created as real folders first, so only my files inside are linked:
+`~/.local/bin`, the workspaces widget's folder, `~/.claude/hooks` and
+`~/.config/herdr` (Herdr keeps its logs, session and plugin registry there).
 
 ## Adding things
 

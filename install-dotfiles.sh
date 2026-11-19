@@ -36,11 +36,14 @@ done
 
 # Stow links a whole folder when it doesn't exist yet. These must be real
 # folders with only the files inside linked: ~/.local/bin is shared with other
-# tools, and Omarchy's shell only loads plugins from real folders.
+# tools, Omarchy's shell only loads plugins from real folders, and Herdr keeps
+# its logs, sockets, session and plugin registry in ~/.config/herdr, which
+# must not end up in the dotfiles repo.
 REAL_DIRS=(
   .local/bin
   .config/omarchy/plugins/stephen.workspaces
   .claude/hooks
+  .config/herdr
 )
 for dir in "${REAL_DIRS[@]}"; do
   [ -L "$HOME/$dir" ] && rm "$HOME/$dir" # a folder link from an earlier run
