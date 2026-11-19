@@ -85,6 +85,15 @@ The plugin lives in its own repo; its keys are in omarchy-dotfiles' Hyprland
 overrides. A copy that is already there is left alone, and a failed download
 doesn't stop the script: run it again.
 
+It also installs the [AirPods](https://github.com/thisisgm/omarchy-pods) bar
+widget (battery per pod and case, listening modes) from the plugin marketplace,
+then runs the plugin's own `setup` if its daemon isn't built yet: that installs
+a few build packages (asks for `sudo`), builds `librepods` into `~/.local` and
+enables `librepods.service`. The icon only shows while AirPods are connected.
+After `omarchy plugin update io.github.thisisgm.omapods`, run
+`~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup` again so the
+daemon matches.
+
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
 loads `~/.config/nvim/plugin/`, and Omarchy reads

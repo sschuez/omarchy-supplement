@@ -3,8 +3,9 @@
 # Hook omarchy-dotfiles into Omarchy and Claude Code, without owning their files:
 # - one include line per Omarchy config file (bash, Hyprland, XCompose, tmux),
 #   added only if it isn't there yet
-# - the cloned workspaces widget switched on in Omarchy's bar, and my Window
-#   Overview plugin installed from its own repo
+# - the cloned workspaces widget switched on in Omarchy's bar, my Window
+#   Overview plugin installed from its own repo, and the AirPods plugin with
+#   its daemon
 # - Claude Code hooks merged into ~/.claude/settings.json
 # Safe to re-run.
 set -e
@@ -62,6 +63,26 @@ if [ -e "$HOME/.config/omarchy/plugins/$WINDOW_OVERVIEW" ]; then
 else
   omarchy plugin add https://github.com/sschuez/omarchy-window-overview --enable --yes ||
     echo "Could not install $WINDOW_OVERVIEW; run this script again" >&2
+fi
+
+# AirPods in the bar (battery per pod and case, listening modes):
+# thisisgm/omarchy-pods from the plugin marketplace. The plugin only draws the
+# panel; its `setup` installs build packages (asks for sudo), builds the
+# librepods daemon into ~/.local and enables librepods.service. setup runs only
+# while the daemon is missing; update with `omarchy plugin update`, then run
+# setup again by hand. Failures here don't stop the rest of this script.
+AIRPODS="io.github.thisisgm.omapods"
+AIRPODS_DIR="$HOME/.config/omarchy/plugins/$AIRPODS"
+if [ -e "$AIRPODS_DIR" ]; then
+  omarchy plugin enable "$AIRPODS" >/dev/null 2>&1 || true
+  echo "Already set up: $AIRPODS"
+else
+  omarchy plugin add https://github.com/thisisgm/omarchy-pods --enable --yes ||
+    echo "Could not install $AIRPODS; run this script again" >&2
+fi
+if [ -x "$AIRPODS_DIR/setup" ] && [ ! -x "$HOME/.local/bin/librepods" ]; then
+  "$AIRPODS_DIR/setup" ||
+    echo "Could not build the AirPods daemon; run $AIRPODS_DIR/setup" >&2
 fi
 
 # Claude Code hooks. Claude Code writes settings.json itself, so merge them in
