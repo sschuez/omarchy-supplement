@@ -33,7 +33,11 @@ installs and wires them up.
    Omarchy's sudoless Docker (Setup > Security > Sudoless Docker, then reboot).
    It makes the `docker` group root-equivalent, which is why Omarchy leaves it
    off. Host development only needs the Postgres container this sets up.
-6. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
+6. Brain.fm in the bar comes from a private repo, so its step is skipped
+   until GitHub knows who you are: run `gh auth login`, then
+   `~/Code/omarchy-supplement/install-brainfm.sh`. Sign in to Brain.fm in the
+   panel (`Super+B`) afterwards.
+7. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
    panel picks up one of their rotating Bluetooth LE addresses, which connects
    without audio or AirPods controls. Run `bluetoothctl`, then `scan bredr`,
    put the AirPods in pairing mode (Pro 3: lid open, double-tap the front of
@@ -56,6 +60,7 @@ has reset a config file and dropped an include line.
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
 | `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides, and sets up the plugins and Claude Code hooks described below. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
+| `install-brainfm.sh` | Brain.fm in the bar: clones my player ([brainfm-tui](https://github.com/sschuez/brainfm-tui), a private repo) to `~/Code/brainfm-tui` and runs its installer, which sets up the `brainfm` command and the bar panel. Installs `mpv-mpris` so the media keys control it. Needs GitHub to know who you are (`gh auth login`); says so and skips otherwise. |
 
 ## How the overrides work
 

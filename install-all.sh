@@ -15,3 +15,6 @@ bash ./install-1password-cli.sh
 bash ./install-dotfiles.sh
 bash ./install-overrides.sh
 bash ./install-keyboard.sh
+
+# My own tools (after the dotfiles: their keys are in the Hyprland overrides)
+bash ./install-brainfm.sh
