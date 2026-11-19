@@ -84,7 +84,10 @@ owned): `WorktreeCreate` and `WorktreeRemove` call `wt hook create|remove`
 Docker project and databases, and removing it at the exit prompt cleans all of
 that up. It also adds two `PreToolUse` safety hooks from omarchy-dotfiles (no
 bare `bin/ci` on protected branches, no destructive database commands), keeping
-any other `PreToolUse` hooks, and enables the cloned workspaces bar widget.
+any other `PreToolUse` hooks. It removes `"tui": "fullscreen"` there too:
+fullscreen mode draws on the alternate screen, so Herdr or tmux copy mode
+(`prefix [`) can't scroll back through a Claude Code session. If `/tui` turns
+it back on, re-run the script. It also enables the cloned workspaces bar widget.
 
 Last, it installs my [Window Overview](https://github.com/sschuez/omarchy-window-overview)
 shell plugin (`Super+E`, `Alt+Tab`) with `omarchy plugin add` and enables it.

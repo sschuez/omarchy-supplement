@@ -6,7 +6,8 @@
 # - the cloned workspaces widget switched on in Omarchy's bar, my Window
 #   Overview plugin installed from its own repo, and the AirPods plugin with
 #   its daemon
-# - Claude Code hooks merged into ~/.claude/settings.json
+# - Claude Code hooks merged into ~/.claude/settings.json, and its fullscreen
+#   renderer switched off
 # Safe to re-run.
 set -e
 
@@ -92,11 +93,15 @@ fi
 # - PreToolUse safety hooks (~/.claude/hooks, claude package): no bare bin/ci on
 #   protected branches, no destructive database commands. Other PreToolUse
 #   hooks are kept.
+# - No "tui": "fullscreen": it draws on the alternate screen, so Herdr/tmux copy
+#   mode (prefix [) can't scroll back through a session. /tui or Claude Code's
+#   fullscreen prompt can switch it back on; re-running this script undoes that.
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
 [ -f "$CLAUDE_SETTINGS" ] || echo '{}' >"$CLAUDE_SETTINGS"
 tmp=$(mktemp)
-jq '.hooks.WorktreeCreate = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook create"}]}]
+jq 'del(.tui)
+  | .hooks.WorktreeCreate = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook create"}]}]
   | .hooks.WorktreeRemove = [{"hooks": [{"type": "command", "command": "$HOME/.local/bin/wt hook remove"}]}]
   | .hooks.PreToolUse = ((.hooks.PreToolUse // [])
       | map(select([.hooks[]?.command] | any(test("/\\.claude/hooks/block-")) | not)))
@@ -107,5 +112,5 @@ jq '.hooks.WorktreeCreate = [{"hooks": [{"type": "command", "command": "$HOME/.l
 if cmp -s "$tmp" "$CLAUDE_SETTINGS"; then
   echo "Already set up: $CLAUDE_SETTINGS"; rm "$tmp"
 else
-  cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Updated Claude Code hooks in $CLAUDE_SETTINGS"
+  cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Updated Claude Code settings in $CLAUDE_SETTINGS"
 fi
