@@ -109,22 +109,19 @@ After `omarchy plugin update io.github.thisisgm.omapods`, run
 `~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup` again so the
 daemon matches.
 
-And it links my Herdr navigate plugin (`Ctrl+h/j/k/l` across panes and Neovim
-splits, like tmux) with `herdr plugin link ~/.config/herdr/navigate-plugin`.
-The plugin's files and its keys come with omarchy-dotfiles' `herdr` package,
-but Herdr only runs a plugin once it's linked; until then the keys do nothing.
-Linking is repeated on every run, which also repairs a link after the dotfiles
-folder has moved, and a failure doesn't stop the script.
+And it links my two Herdr plugins, whose files come with omarchy-dotfiles'
+`herdr` package (Herdr only runs a plugin once it's linked):
 
-Then it installs the community plugin
-[herdr-automatic-rename](https://github.com/qu8n/herdr-automatic-rename), which
-names Herdr tabs like tmux's automatic-rename (`[1] nvim`, or the task an agent
-is on). A plugin runs as me, so it is pinned to a version whose source was read
-through (`HERDR_RENAME_REF` in the script): to move on, read what changed, bump
-the version and run the script again. Its settings and its shell hook come with
-omarchy-dotfiles (`~/.config/herdr-automatic-rename/config.sh` and the end of
-`~/.config/bash/aliases`); open a new terminal for the hook. It needs the
-network the first time, and a failure doesn't stop the script.
+- `navigate-plugin`: `Ctrl+h/j/k/l` across panes and Neovim splits, like tmux.
+  The keys are in Herdr's config; until the plugin is linked they do nothing.
+- `tabs-plugin`: tab names like tmux's automatic-rename (`2 nvim`). Its shell
+  hook is at the end of `~/.config/bash/aliases`; open a new terminal for it.
+
+Linking is repeated on every run, which also repairs a link after the dotfiles
+folder has moved, and the tabs that are open get their names right away. Where
+the community plugin herdr-automatic-rename is still installed (it named the
+tabs before `tabs-plugin` did), the script removes it and hands its tabs over.
+A failure doesn't stop the script.
 
 Some apps need no include line, because they load a whole folder by
 themselves: LazyVim loads every file in `~/.config/nvim/lua/plugins/`, Neovim
