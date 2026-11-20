@@ -21,3 +21,7 @@ bash ./install-wifi.sh
 
 # My own tools (after the dotfiles: their keys are in the Hyprland overrides)
 bash ./install-brainfm.sh
+
+# Google Drive at ~/GoogleDrive (after the dotfiles: the mount's unit comes with
+# them). Last, because its first run waits for a Google sign-in in the browser.
+bash ./install-google-drive.sh

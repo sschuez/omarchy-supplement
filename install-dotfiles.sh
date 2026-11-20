@@ -5,7 +5,7 @@ set -e
 
 REPO_URL="https://github.com/sschuez/omarchy-dotfiles.git"
 REPO_DIR="$HOME/Code/omarchy-dotfiles"
-PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr bin claude wifi)   # add more as you create them
+PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr bin claude rclone wifi)   # add more as you create them
 
 # Files we own outright instead of overlaying (relative to ~). Omarchy ships its
 # own copy, and Stow won't replace a real file, so it's moved aside first.

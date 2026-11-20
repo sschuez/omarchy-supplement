@@ -30,19 +30,23 @@ installs and wires them up.
    Integrate with 1Password CLI turned on. Then run `wifi-sync`: it adds every
    network in the Wi-Fi vault of my personal account. A network joined later
    is saved to the vault by itself, with a notification.
-5. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
+5. Google Drive (`~/GoogleDrive`) waits for 1Password in the same way, and
+   then for a Google sign-in. Run
+   `~/Code/omarchy-supplement/install-google-drive.sh` and sign in to Google in
+   the browser window it opens (see [Google Drive](#google-drive)).
+6. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
    (Neovim's Ruby language server). Install it once in each:
    `mise exec ruby@<version> -- gem install ruby-lsp`. Rubies mise installs
    later get it automatically (see `~/.default-gems` in omarchy-dotfiles).
-6. Optional: to run whole Docker stacks (`dcu`, `dcr`) without `sudo`, enable
+7. Optional: to run whole Docker stacks (`dcu`, `dcr`) without `sudo`, enable
    Omarchy's sudoless Docker (Setup > Security > Sudoless Docker, then reboot).
    It makes the `docker` group root-equivalent, which is why Omarchy leaves it
    off. Host development only needs the Postgres container this sets up.
-7. Brain.fm in the bar comes from a private repo, so its step is skipped
+8. Brain.fm in the bar comes from a private repo, so its step is skipped
    until GitHub knows who you are: run `gh auth login`, then
    `~/Code/omarchy-supplement/install-brainfm.sh`. Sign in to Brain.fm in the
    panel (`Super+B`) afterwards.
-8. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
+9. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
    panel picks up one of their rotating Bluetooth LE addresses, which connects
    without audio or AirPods controls. Run `bluetoothctl`, then `scan bredr`,
    put the AirPods in pairing mode (Pro 3: lid open, double-tap the front of
@@ -67,6 +71,7 @@ has reset a config file and dropped an include line.
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
 | `install-wifi.sh` | Adds the Wi-Fi networks kept in 1Password to this machine, with `wifi-sync pull` from omarchy-dotfiles, and starts `wifi-sync.service`, which saves a newly joined network there. Needs the 1Password app signed in and its CLI integration turned on; says so and goes on otherwise. |
 | `install-brainfm.sh` | Brain.fm in the bar: clones my player ([brainfm-tui](https://github.com/sschuez/brainfm-tui), a private repo) to `~/Code/brainfm-tui` and runs its installer, which sets up the `brainfm` command and the bar panel. Installs `mpv-mpris` so the media keys control it. Needs GitHub to know who you are (`gh auth login`); says so and skips otherwise. |
+| `install-google-drive.sh` | Google Drive as the folder `~/GoogleDrive`: installs rclone, signs in to Google once per machine (in the browser), mounts the folder (My Drive and the shared drives) now and at every login, and adds it to the Files sidebar. Needs the 1Password app signed in (my Google API client is kept there); says so and skips otherwise. See [Google Drive](#google-drive). |
 
 ## How the overrides work
 
@@ -147,6 +152,46 @@ the ones created as real folders first, so only my files inside are linked:
 `~/.config/herdr` (Herdr keeps its logs, session and plugin registry there)
 and `~/.config/systemd/user` (systemd puts its own links there when a unit is
 enabled).
+
+## Google Drive
+
+`install-google-drive.sh` makes Google Drive a folder, `~/GoogleDrive`, with
+[rclone](https://rclone.org/drive/). It is mounted, not synced: a file is
+fetched when it's opened, and what was opened stays on disk for a while (up to
+10 GB, 30 days), so nothing takes up space up front and only those files work
+offline. Inside are `My Drive` and one folder per shared drive; after joining
+a new shared drive, run the script again. Google Docs, Sheets and Slides show
+up as links that open in the browser. The mount is a systemd user service,
+`rclone-gdrive`, whose unit comes with omarchy-dotfiles' `rclone` package; the
+flags are explained there.
+
+Two things are not in a repo:
+
+- **My Google API client.** rclone talks to Google as an "app", and the one
+  shared by all rclone users is being retired, so I have my own. Its client ID
+  and secret are in 1Password, in the item `rclone Google Drive` in the Shared
+  vault of the submissio account (an API Credential: the client ID as username,
+  the secret as credential). The script reads them from there. To make a new
+  one, follow rclone's
+  [Making your own client_id](https://rclone.org/drive/#making-your-own-client-id):
+  a Google Cloud project with the Google Drive API enabled and an OAuth client
+  of type "Desktop app". Publish the app (or make it "Internal" in a Google
+  Workspace): left in "Testing", the sign-in expires every week.
+- **The sign-in.** The script opens a browser window for it once per machine.
+  The token stays in `~/.config/rclone/rclone.conf`, as the rclone remote
+  `gdrive`. The script writes a second remote there, `gdrive-all`, which puts
+  My Drive and the shared drives side by side: that one is mounted.
+
+If something goes wrong:
+
+- `systemctl --user status rclone-gdrive` shows whether it's mounted, and
+  `journalctl --user -u rclone-gdrive -f` the live log.
+- A folder that looks empty or stuck: `systemctl --user restart rclone-gdrive`.
+- Signed in to the wrong account, or the sign-in no longer works:
+  `rclone config delete gdrive`, then the script again.
+- `systemctl --user disable rclone-gdrive` also removes the unit's link from
+  `~/.config/systemd/user`, as systemd does for a unit that is a link. Run
+  `install-dotfiles.sh` and this script again to get it back.
 
 ## Adding things
 
