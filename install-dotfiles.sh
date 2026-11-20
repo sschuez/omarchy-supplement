@@ -5,7 +5,7 @@ set -e
 
 REPO_URL="https://github.com/sschuez/omarchy-dotfiles.git"
 REPO_DIR="$HOME/Code/omarchy-dotfiles"
-PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr bin claude)   # add more as you create them
+PACKAGES=(bash hypr omarchy xcompose tmux nvim mise herdr bin claude wifi)   # add more as you create them
 
 # Files we own outright instead of overlaying (relative to ~). Omarchy ships its
 # own copy, and Stow won't replace a real file, so it's moved aside first.
@@ -38,12 +38,14 @@ done
 # folders with only the files inside linked: ~/.local/bin is shared with other
 # tools, Omarchy's shell only loads plugins from real folders, and Herdr keeps
 # its logs, sockets, session and plugin registry in ~/.config/herdr, which
-# must not end up in the dotfiles repo.
+# must not end up in the dotfiles repo. Nor must the links systemd makes in
+# ~/.config/systemd/user when a unit is enabled.
 REAL_DIRS=(
   .local/bin
   .config/omarchy/plugins/stephen.workspaces
   .claude/hooks
   .config/herdr
+  .config/systemd/user
 )
 for dir in "${REAL_DIRS[@]}"; do
   [ -L "$HOME/$dir" ] && rm "$HOME/$dir" # a folder link from an earlier run

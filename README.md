@@ -25,19 +25,24 @@ installs and wires them up.
    submissio's Rails key:
    `op read "op://Shared/Rails Master Key (Production)/password" --account submissioag.1password.com > config/master.key`.
    New worktrees copy it from the main checkout automatically.
-4. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
+4. The Wi-Fi networks I know come from 1Password too, and that step is
+   skipped until the 1Password app is signed in with Settings > Developer >
+   Integrate with 1Password CLI turned on. Then run `wifi-sync`: it adds every
+   network in the Wi-Fi vault of my personal account. A network joined later
+   is saved to the vault by itself, with a notification.
+5. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
    (Neovim's Ruby language server). Install it once in each:
    `mise exec ruby@<version> -- gem install ruby-lsp`. Rubies mise installs
    later get it automatically (see `~/.default-gems` in omarchy-dotfiles).
-5. Optional: to run whole Docker stacks (`dcu`, `dcr`) without `sudo`, enable
+6. Optional: to run whole Docker stacks (`dcu`, `dcr`) without `sudo`, enable
    Omarchy's sudoless Docker (Setup > Security > Sudoless Docker, then reboot).
    It makes the `docker` group root-equivalent, which is why Omarchy leaves it
    off. Host development only needs the Postgres container this sets up.
-6. Brain.fm in the bar comes from a private repo, so its step is skipped
+7. Brain.fm in the bar comes from a private repo, so its step is skipped
    until GitHub knows who you are: run `gh auth login`, then
    `~/Code/omarchy-supplement/install-brainfm.sh`. Sign in to Brain.fm in the
    panel (`Super+B`) afterwards.
-7. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
+8. Pair the AirPods in a terminal, not from the bar's Bluetooth panel: the
    panel picks up one of their rotating Bluetooth LE addresses, which connects
    without audio or AirPods controls. Run `bluetoothctl`, then `scan bredr`,
    put the AirPods in pairing mode (Pro 3: lid open, double-tap the front of
@@ -60,6 +65,7 @@ has reset a config file and dropped an include line.
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
 | `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides, and sets up the plugins and Claude Code hooks described below. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
+| `install-wifi.sh` | Adds the Wi-Fi networks kept in 1Password to this machine, with `wifi-sync pull` from omarchy-dotfiles, and starts `wifi-sync.service`, which saves a newly joined network there. Needs the 1Password app signed in and its CLI integration turned on; says so and goes on otherwise. |
 | `install-brainfm.sh` | Brain.fm in the bar: clones my player ([brainfm-tui](https://github.com/sschuez/brainfm-tui), a private repo) to `~/Code/brainfm-tui` and runs its installer, which sets up the `brainfm` command and the bar panel. Installs `mpv-mpris` so the media keys control it. Needs GitHub to know who you are (`gh auth login`); says so and skips otherwise. |
 
 ## How the overrides work
@@ -137,8 +143,10 @@ aside (`*.bak.<timestamp>`) before linking. Currently
 Stow links a whole folder when the folder doesn't exist yet, which is wrong for
 folders other programs write into. `REAL_DIRS` in `install-dotfiles.sh` lists
 the ones created as real folders first, so only my files inside are linked:
-`~/.local/bin`, the workspaces widget's folder, `~/.claude/hooks` and
-`~/.config/herdr` (Herdr keeps its logs, session and plugin registry there).
+`~/.local/bin`, the workspaces widget's folder, `~/.claude/hooks`,
+`~/.config/herdr` (Herdr keeps its logs, session and plugin registry there)
+and `~/.config/systemd/user` (systemd puts its own links there when a unit is
+enabled).
 
 ## Adding things
 

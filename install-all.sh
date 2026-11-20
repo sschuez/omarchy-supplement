@@ -16,5 +16,8 @@ bash ./install-dotfiles.sh
 bash ./install-overrides.sh
 bash ./install-keyboard.sh
 
+# Wi-Fi networks from 1Password (after the dotfiles: wifi-sync comes with them)
+bash ./install-wifi.sh
+
 # My own tools (after the dotfiles: their keys are in the Hyprland overrides)
 bash ./install-brainfm.sh
