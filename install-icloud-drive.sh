@@ -4,26 +4,34 @@
 # (the unit comes with omarchy-dotfiles' rclone package). Files are fetched
 # when they're opened, so nothing takes up disk space up front.
 #
-# The first run on a machine signs in to Apple, in this terminal: Apple ID,
-# password, then the code the iPhone shows. The sign-in stays in
-# ~/.config/rclone/rclone.conf (the remote "icloud"), never in a repo. That
-# includes the Apple ID password, which rclone needs at every start and keeps
-# obscured, not encrypted: whoever can read that file can get it back. Two
-# settings on the Apple account have to allow all this, or Apple refuses:
+# The first run on a machine signs in to Apple, in this terminal: the Apple ID
+# and its password come from 1Password, then rclone asks for the code the
+# iPhone shows. What Apple hands back, a session, stays in
+# ~/.config/rclone/rclone.conf (the remote "icloud"), never in a repo. The
+# password is not kept there or anywhere else on this machine: rclone gets it
+# for the sign-in only. The 1Password item is "idmsa.apple.com
+# (stephens@hey.com)", a Login in my personal account; ICLOUD_OP_ACCOUNT and
+# ICLOUD_OP_ITEM choose another account or item.
+#
+# Two settings on the Apple account have to allow all this, or Apple refuses:
 # Advanced Data Protection off, and "Access iCloud Data on the Web" on
 # (iPhone: Settings > your name > iCloud).
 #
 # Apple's sign-in lasts 30 days. Once it has run out, a notification says so
-# and runs this again when clicked: it asks for a new code only, and remounts.
+# and runs this again when clicked: 1Password and a new code, and it remounts.
 #
-# Without a terminal to type into, this step says so and the rest of the
-# setup goes on. Run it again afterwards.
+# That needs the 1Password app signed in, with Settings > Developer >
+# "Integrate with 1Password CLI" turned on, and a terminal to type the code
+# into. Without either, this step says so and the rest of the setup goes on.
+# Run it again afterwards.
 set -e
 
 REMOTE=icloud
 UNIT=rclone-icloud.service
 TIMER=rclone-icloud-check.timer    # asks every hour whether Apple still takes the sign-in
 CHECK="$HOME/.local/bin/icloud-signin-check"
+OP_ACCOUNT=${ICLOUD_OP_ACCOUNT:-my.1password.eu}
+OP_ITEM=${ICLOUD_OP_ITEM:-idmsa.apple.com (stephens@hey.com)}
 SELF=$(realpath "$0")
 
 skip() {
@@ -76,42 +84,50 @@ if [ -n "$sign_in" ]; then
   }
   trap give_up INT
 
+  item=$(op item get "$OP_ITEM" --account "$OP_ACCOUNT" --format json </dev/null) ||
+    skip "can't read \"$OP_ITEM\" from 1Password ($OP_ACCOUNT). Once the 1Password app is signed in, run $SELF"
+  field() { # the value of the item's username or password: field USERNAME
+    jq -r --arg purpose "$1" '[.fields[]? | select(.purpose == $purpose) | .value // ""] | first // ""' <<<"$item"
+  }
+  apple_id=$(field USERNAME)
+  password=$(field PASSWORD)
+  unset item
+  if [ -z "$apple_id" ] || [ -z "$password" ]; then
+    skip "\"$OP_ITEM\" in 1Password has no username or no password"
+  fi
+
   if [ "$sign_in" = again ]; then
     echo "The Apple sign-in has run out. Signing in again as $(remote_value "$REMOTE" apple_id)."
-    echo "Not now? Press Ctrl+C and run this script again later."
   else
-    echo "Sign in to iCloud. Not now? Press Ctrl+C and run this script again later."
-    read -rp "Apple ID (email): " apple_id || give_up
-    read -rsp "Apple ID password: " password || give_up
-    echo
-    [ -n "$apple_id" ] && [ -n "$password" ] || give_up
-
     # The remote is written into rclone.conf here, and rclone only does the
     # sign-in, with `config reconnect` below. `rclone config create` can't
     # sign in: it answers the question for the iPhone's code itself, with
     # nothing, and stops with 'unknown state "authenticate"' (rclone 1.75).
-    # Writing it here also keeps the password out of rclone's arguments, where
-    # other processes could read it. It goes in obscured, as rclone keeps it,
-    # turned into that form through stdin.
+    # No password in it: rclone's own setup would save one, obscured but not
+    # encrypted, so whoever can read the file could get it back.
     conf=$(rclone config file | tail -1)
     if grep -q '^RCLONE_ENCRYPT_V0:' "$conf" 2>/dev/null; then
       skip "$conf is encrypted; add the remote \"$REMOTE\" (iclouddrive) with: rclone config"
     fi
-    obscured=$(printf '%s' "$password" | rclone obscure -)
-    unset password
     rclone config delete "$REMOTE" >/dev/null 2>&1 || true
     mkdir -p "$(dirname "$conf")"
     touch "$conf"
     chmod 600 "$conf"
     # A last line without its newline would otherwise be joined with this one.
     [ -z "$(tail -c1 "$conf")" ] || echo >>"$conf"
-    printf '\n[%s]\ntype = iclouddrive\nservice = drive\napple_id = %s\npassword = %s\n' \
-      "$REMOTE" "$apple_id" "$obscured" >>"$conf"
-    unset obscured
+    printf '\n[%s]\ntype = iclouddrive\nservice = drive\napple_id = %s\n' \
+      "$REMOTE" "$apple_id" >>"$conf"
+    echo "Signing in to iCloud as $apple_id."
   fi
 
-  echo "Next, type the code your iPhone shows when rclone asks for it."
-  rclone config reconnect "$REMOTE:" || give_up
+  # rclone gets the password for this sign-in only, in its environment, which
+  # only my own processes can read (its arguments are open to all). It wants
+  # it obscured, and stdin is how it gets that way without being an argument.
+  # A mount runs on the session Apple hands back, without the password.
+  echo "Type the code your iPhone shows when rclone asks for it. Not now? Press Ctrl+C."
+  RCLONE_ICLOUDDRIVE_PASSWORD=$(printf '%s' "$password" | rclone obscure -) \
+    rclone config reconnect "$REMOTE:" || give_up
+  unset password
   trap - INT
   [ -n "$(remote_value "$REMOTE" trust_token)" ] || give_up
   remounts=yes
