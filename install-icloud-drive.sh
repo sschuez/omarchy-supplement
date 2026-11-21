@@ -9,9 +9,10 @@
 # iPhone shows. What Apple hands back, a session, stays in
 # ~/.config/rclone/rclone.conf (the remote "icloud"), never in a repo. The
 # password is not kept there or anywhere else on this machine: rclone gets it
-# for the sign-in only. The 1Password item is "idmsa.apple.com
-# (stephens@hey.com)", a Login in my personal account; ICLOUD_OP_ACCOUNT and
-# ICLOUD_OP_ITEM choose another account or item.
+# for the sign-in only. The 1Password item is my Apple ID's Login in my
+# personal account, named below by its ID rather than its title, which holds
+# the address; ICLOUD_OP_ACCOUNT and ICLOUD_OP_ITEM choose another account or
+# item.
 #
 # Two settings on the Apple account have to allow all this, or Apple refuses:
 # Advanced Data Protection off, and "Access iCloud Data on the Web" on
@@ -31,7 +32,7 @@ UNIT=rclone-icloud.service
 TIMER=rclone-icloud-check.timer    # asks every hour whether Apple still takes the sign-in
 CHECK="$HOME/.local/bin/icloud-signin-check"
 OP_ACCOUNT=${ICLOUD_OP_ACCOUNT:-my.1password.eu}
-OP_ITEM=${ICLOUD_OP_ITEM:-idmsa.apple.com (stephens@hey.com)}
+OP_ITEM=${ICLOUD_OP_ITEM:-bccljc5gh5ywzajqjew2fonnpe}   # my Apple ID's Login item
 SELF=$(realpath "$0")
 
 skip() {
