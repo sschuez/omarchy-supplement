@@ -213,8 +213,8 @@ elsewhere, so a file added on the iPhone shows up within 5 minutes.
   "Access iCloud Data on the Web" on (iPhone: Settings > your name > iCloud).
   Otherwise Apple refuses the sign-in.
 - **The sign-in** happens in the terminal: the script reads the Apple ID and
-  its password from 1Password (the Login item `idmsa.apple.com
-  (stephens@hey.com)` in my personal account), and rclone asks for the code
+  its password from 1Password (my Apple ID's Login item in my personal
+  account, which the script names by its ID), and rclone asks for the code
   the iPhone shows. What Apple hands back, a session, stays in
   `~/.config/rclone/rclone.conf`, as the rclone remote `icloud`.
 - **The password is not kept on this machine.** rclone's own setup saves it
@@ -247,7 +247,7 @@ keys:
 
 ```sh
 infomaniak openstack server list
-infomaniak aws s3api get-bucket-cors --bucket chalet-production
+infomaniak aws s3 ls s3://<bucket>
 exoscale exo compute instance list
 ```
 
@@ -255,27 +255,35 @@ The keys stay in 1Password. `op run` hands them to that one command as
 environment variables, so none is written to `~/.config/openstack`, `~/.aws`
 or `~/.config/exoscale`, and a new machine needs nothing but the 1Password app
 signed in, with its CLI integration on. Each key is an API Credential item, its
-ID as the username and its secret as the credential:
+ID as the username and its secret as the credential, named without brackets,
+which an `op://` reference refuses:
 
 | Command | 1Password | Item | The key |
 |---|---|---|---|
-| `infomaniak openstack …` | personal account, vault `Main` | `Infomaniak chalet-production OpenStack` | An application credential of the project chalet-production |
-| `infomaniak aws …` | personal account, vault `Main` | `Infomaniak chalet-production S3` | An S3 key pair of the same project: a pair of its own, not the app's, so either can be revoked alone |
-| `exoscale exo …` | submissio account, vault `Shared` | `exoscale-ops` | The Owner API key |
+| `infomaniak openstack …` | personal account, vault `Main` | `infomaniak-chalet-openstack` | An application credential of chalet's project |
+| `infomaniak aws …` | personal account, vault `Main` | `infomaniak-chalet-s3` | An S3 key pair of the same project: a pair of its own, not the app's, so either can be revoked alone |
+| `exoscale exo …` | submissio account, vault `Shared` | `exoscale-ops` | An API key of submissio's organization |
 
 Each command reads only the item it needs; a shell or a script run under
 `infomaniak` gets both of its keys. Variables at the top of each script choose
-another account, vault or item, say a narrower Exoscale key.
+another account, vault or item, say a narrower Exoscale key. The shell's own
+`OS_*`, `AWS_*` and `EXOSCALE_*` variables are left out, so an RC file sourced
+earlier can't mix into a sign-in.
 
 The two Infomaniak keys are made once, from a session signed in with the
-project user's password (the manager offers the project's OpenStack RC file):
-Keystone mints neither from a session that signed in with an application
-credential (chalet's `docs/deploy.md`, steps 1 and 2).
+project user's password: Keystone mints neither from a session that signed in
+with an application credential. Download the project's OpenStack RC file from
+Infomaniak's manager, then run this in a terminal. It asks for that password,
+makes both keys and puts them straight into 1Password, never on the screen:
 
 ```sh
-(source ~/Downloads/<project>-openrc.txt
- openstack application credential create cli   # the OpenStack item
- openstack ec2 credentials create)              # the S3 item
+(source ~/Downloads/<the project's openrc file>
+ item() { jq --arg title "$1" --arg key "$2" '{title: $title, category: "API_CREDENTIAL", fields: [
+   {id: "username", type: "STRING", value: .[$key]},
+   {id: "credential", type: "CONCEALED", value: .secret}]}' |
+   op item create --vault Main --account my.1password.eu - >/dev/null; }
+ openstack application credential create 1password -f json | item infomaniak-chalet-openstack id
+ openstack ec2 credentials create -f json | item infomaniak-chalet-s3 access)
 ```
 
 ## Adding things
