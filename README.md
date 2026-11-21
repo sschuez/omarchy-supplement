@@ -271,21 +271,20 @@ another account, vault or item, say a narrower Exoscale key. The shell's own
 `OS_*`, `AWS_*` and `EXOSCALE_*` variables are left out, so an RC file sourced
 earlier can't mix into a sign-in.
 
-The two Infomaniak keys are made once, from a session signed in with the
-project user's password: Keystone mints neither from a session that signed in
-with an application credential. Download the project's OpenStack RC file from
-Infomaniak's manager, then run this in a terminal. It asks for that password,
-makes both keys and puts them straight into 1Password, never on the screen:
+The two Infomaniak keys are made once, with `infomaniak-keys` from the same
+package. Download the project's OpenStack RC file from Infomaniak's manager
+(region dc3-a), then, in a terminal:
 
 ```sh
-(source ~/Downloads/<the project's openrc file>
- item() { jq --arg title "$1" --arg key "$2" '{title: $title, category: "API_CREDENTIAL", fields: [
-   {id: "username", type: "STRING", value: .[$key]},
-   {id: "credential", type: "CONCEALED", value: .secret}]}' |
-   op item create --vault Main --account my.1password.eu - >/dev/null; }
- openstack application credential create 1password -f json | item infomaniak-chalet-openstack id
- openstack ec2 credentials create -f json | item infomaniak-chalet-s3 access)
+infomaniak-keys ~/Downloads/<the project's openrc file>
 ```
+
+It asks for the project user's password without showing it, checks it, makes
+an application credential and an S3 key pair of the project and saves each in
+1Password, never on the screen. A key already there is skipped, and a key it
+made but couldn't save is deleted again. Both come from the password's session
+because Keystone mints neither from a session that signed in with an
+application credential.
 
 ## Adding things
 
