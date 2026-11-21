@@ -23,7 +23,8 @@ installs and wires them up.
 
 3. Per project, restore the secrets that aren't in git from 1Password, e.g.
    submissio's Rails key:
-   `op read "op://Shared/Rails Master Key (Production)/password" --account submissioag.1password.com > config/master.key`.
+   `op read "op://c54ee3lt7vr4j3uwx3gdtubmze/mqmcvlet6rlvvgfwts4g2zkire/password" --account LYQ2QZB6QBCS3DQDPVKNWJ2OKI > config/master.key`
+   (the vault, item and account by their IDs: their names are the company's).
    New worktrees copy it from the main checkout automatically.
 4. The Wi-Fi networks I know come from 1Password too, and that step is
    skipped until the 1Password app is signed in with Settings > Developer >
@@ -176,9 +177,9 @@ Two things are not in a repo:
 
 - **My Google API client.** rclone talks to Google as an "app", and the one
   shared by all rclone users is being retired, so I have my own. Its client ID
-  and secret are in 1Password, in the item `rclone Google Drive` in the Shared
-  vault of the submissio account (an API Credential: the client ID as username,
-  the secret as credential). The script reads them from there. To make a new
+  and secret are in 1Password, in an API Credential item of submissio's
+  account (the client ID as username, the secret as credential), which the
+  script names by its IDs. The script reads them from there. To make a new
   one, follow rclone's
   [Making your own client_id](https://rclone.org/drive/#making-your-own-client-id):
   a Google Cloud project with the Google Drive API enabled and an OAuth client
@@ -262,7 +263,7 @@ which an `op://` reference refuses:
 |---|---|---|---|
 | `infomaniak openstack …` | personal account, vault `Main` | `infomaniak-chalet-openstack` | An application credential of chalet's project |
 | `infomaniak aws …` | personal account, vault `Main` | `infomaniak-chalet-s3` | An S3 key pair of the same project: a pair of its own, not the app's, so either can be revoked alone |
-| `exoscale exo …` | submissio account, vault `Shared` | `exoscale-ops` | An API key of submissio's organization |
+| `exoscale exo …` | submissio's account | named by its IDs in the script | An API key of submissio's organization |
 
 Each command reads only the item it needs; a shell or a script run under
 `infomaniak` gets both of its keys. Variables at the top of each script choose

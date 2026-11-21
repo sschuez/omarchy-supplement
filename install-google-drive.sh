@@ -10,10 +10,11 @@
 # the token it returns stays in ~/.config/rclone/rclone.conf, never in a repo.
 # rclone needs a Google API client of my own for that (the one shared by all
 # rclone users is being retired). Its client ID and secret are in 1Password,
-# in the item "rclone Google Drive" in the Shared vault of the submissio
-# account: an API Credential item, the client ID as its username and the
-# secret as its credential (fields named "client id" and "client secret" work
-# too). GDRIVE_OP_ACCOUNT and GDRIVE_OP_ITEM choose another account or item.
+# in an API Credential item in submissio's account, the client ID as its
+# username and the secret as its credential (fields named "client id" and
+# "client secret" work too). It is named below by its IDs: the account's and
+# the item's names are the company's, not this public repo's.
+# GDRIVE_OP_ACCOUNT and GDRIVE_OP_ITEM choose another account or item.
 #
 # That needs the 1Password app signed in, with Settings > Developer >
 # "Integrate with 1Password CLI" turned on. Without it, or without the Google
@@ -24,8 +25,8 @@ set -e
 REMOTE=gdrive          # the Google sign-in; by itself only My Drive
 ALL=gdrive-all         # My Drive and the shared drives together: what gets mounted
 UNIT=rclone-gdrive.service
-OP_ACCOUNT=${GDRIVE_OP_ACCOUNT:-submissioag.1password.com}
-OP_ITEM=${GDRIVE_OP_ITEM:-rclone Google Drive}
+OP_ACCOUNT=${GDRIVE_OP_ACCOUNT:-LYQ2QZB6QBCS3DQDPVKNWJ2OKI}   # submissio's 1Password
+OP_ITEM=${GDRIVE_OP_ITEM:-zdf7yhucmf67uphcgeccecwxqy}         # my Google API client for rclone
 SELF=$(realpath "$0")
 
 skip() {
