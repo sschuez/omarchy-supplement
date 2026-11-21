@@ -8,7 +8,17 @@
 #   its buckets.
 # - exo: Exoscale (submissio). Not packaged for Arch, so mise installs
 #   Exoscale's own release from GitHub; `mise up` updates it.
-set -e
+#
+# Nothing else in the setup needs them, so a step that fails (a mirror or
+# GitHub out of reach) says so and the rest of the setup goes on. Run this
+# again afterwards.
 
-yay -S --noconfirm --needed python-openstackclient aws-cli-v2
-mise use --global github:exoscale/cli@latest
+SELF=$(realpath "$0")
+
+yay -S --noconfirm --needed python-openstackclient aws-cli-v2 ||
+  echo "Could not install openstack and aws; run $SELF again" >&2
+
+mise use --global github:exoscale/cli@latest ||
+  echo "Could not install exo; run $SELF again" >&2
+
+exit 0

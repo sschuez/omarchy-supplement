@@ -72,7 +72,7 @@ has reset a config file and dropped an include line.
 | `install-stow.sh` | Installs GNU Stow. |
 | `install-postgres.sh` | PostgreSQL 18 for development, the Omarchy way: `omarchy install docker dbs` runs it in a container on `localhost:5432` (user `postgres`). Also starts Docker at boot, so the database is back after every reboot. Needs `sudo`. |
 | `install-1password-cli.sh` | 1Password CLI (`op`), for secrets such as Rails master keys. Omarchy packages it. |
-| `install-cloud-clis.sh` | The command lines of the clouds my projects run on: `openstack` and `aws` for Infomaniak's Public Cloud (chalet), `exo` for Exoscale (submissio), the last through mise, since Arch doesn't package it. omarchy-dotfiles' `infomaniak` and `exoscale` run them with their keys from 1Password (see [Clouds](#clouds)). |
+| `install-cloud-clis.sh` | The command lines of the clouds my projects run on: `openstack` and `aws` for Infomaniak's Public Cloud (chalet), `exo` for Exoscale (submissio), the last through mise, since Arch doesn't package it. omarchy-dotfiles' `infomaniak` and `exoscale` run them with their keys from 1Password (see [Clouds](#clouds)). A step that fails (a mirror or GitHub out of reach) says so and the setup goes on; run it again afterwards. |
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
 | `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides, and sets up the plugins and Claude Code hooks described below. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
