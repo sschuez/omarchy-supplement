@@ -25,3 +25,6 @@ bash ./install-brainfm.sh
 # Google Drive at ~/GoogleDrive (after the dotfiles: the mount's unit comes with
 # them). Last, because its first run waits for a Google sign-in in the browser.
 bash ./install-google-drive.sh
+# iCloud Drive at ~/iCloudDrive, the same way. Its first run asks for the Apple
+# ID, password and a code from the iPhone, in the terminal.
+bash ./install-icloud-drive.sh
