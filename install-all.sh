@@ -10,6 +10,7 @@ cd "$(dirname "$0")"  # run from this repo's folder, wherever we're called from
 bash ./install-stow.sh
 bash ./install-postgres.sh
 bash ./install-1password-cli.sh
+bash ./install-cloud-clis.sh
 
 # dotfiles and overrides
 bash ./install-dotfiles.sh

@@ -71,6 +71,7 @@ has reset a config file and dropped an include line.
 | `install-stow.sh` | Installs GNU Stow. |
 | `install-postgres.sh` | PostgreSQL 18 for development, the Omarchy way: `omarchy install docker dbs` runs it in a container on `localhost:5432` (user `postgres`). Also starts Docker at boot, so the database is back after every reboot. Needs `sudo`. |
 | `install-1password-cli.sh` | 1Password CLI (`op`), for secrets such as Rails master keys. Omarchy packages it. |
+| `install-cloud-clis.sh` | The command lines of the clouds my projects run on: `openstack` and `aws` for Infomaniak's Public Cloud (chalet), `exo` for Exoscale (submissio), the last through mise, since Arch doesn't package it. omarchy-dotfiles' `infomaniak` and `exoscale` run them with their keys from 1Password (see [Clouds](#clouds)). |
 | `install-dotfiles.sh` | Clones omarchy-dotfiles to `~/Code/omarchy-dotfiles` and symlinks its packages into `~` with Stow. |
 | `install-overrides.sh` | Adds one include line to each Omarchy config file that should load my overrides, and sets up the plugins and Claude Code hooks described below. |
 | `install-keyboard.sh` | Sets fcitx5 to US International to match Hyprland. Needs a running desktop session; skips otherwise. |
@@ -237,6 +238,45 @@ If something goes wrong:
   script again. A changed Apple ID password only has to be right in 1Password.
 - `systemctl --user disable rclone-icloud` also removes the unit's link, as
   for Google Drive.
+
+## Clouds
+
+`install-cloud-clis.sh` installs the clouds' command lines, and
+omarchy-dotfiles' `clouds` package two commands that run them with their
+keys:
+
+```sh
+infomaniak openstack server list
+infomaniak aws s3api get-bucket-cors --bucket chalet-production
+exoscale exo compute instance list
+```
+
+The keys stay in 1Password. `op run` hands them to that one command as
+environment variables, so none is written to `~/.config/openstack`, `~/.aws`
+or `~/.config/exoscale`, and a new machine needs nothing but the 1Password app
+signed in, with its CLI integration on. Each key is an API Credential item, its
+ID as the username and its secret as the credential:
+
+| Command | 1Password | Item | The key |
+|---|---|---|---|
+| `infomaniak openstack …` | personal account, vault `Main` | `Infomaniak chalet-production OpenStack` | An application credential of the project chalet-production |
+| `infomaniak aws …` | personal account, vault `Main` | `Infomaniak chalet-production S3` | An S3 key pair of the same project: a pair of its own, not the app's, so either can be revoked alone |
+| `exoscale exo …` | submissio account, vault `Shared` | `exoscale-ops` | The Owner API key |
+
+Each command reads only the item it needs; a shell or a script run under
+`infomaniak` gets both of its keys. Variables at the top of each script choose
+another account, vault or item, say a narrower Exoscale key.
+
+The two Infomaniak keys are made once, from a session signed in with the
+project user's password (the manager offers the project's OpenStack RC file):
+Keystone mints neither from a session that signed in with an application
+credential (chalet's `docs/deploy.md`, steps 1 and 2).
+
+```sh
+(source ~/Downloads/<project>-openrc.txt
+ openstack application credential create cli   # the OpenStack item
+ openstack ec2 credentials create)              # the S3 item
+```
 
 ## Adding things
 
