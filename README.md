@@ -34,9 +34,10 @@ installs and wires them up.
    then for a Google sign-in. Run
    `~/Code/omarchy-supplement/install-google-drive.sh` and sign in to Google in
    the browser window it opens (see [Google Drive](#google-drive)).
-   iCloud Drive (`~/iCloudDrive`) asks for an Apple sign-in in the terminal
-   during `install-all.sh`; skipped, run
-   `~/Code/omarchy-supplement/install-icloud-drive.sh` later (see
+   iCloud Drive (`~/iCloudDrive`) is the last thing `install-all.sh` asks
+   for: Apple ID, password and a code from the iPhone, in the terminal. Press
+   Ctrl+C to leave it for later, and run
+   `~/Code/omarchy-supplement/install-icloud-drive.sh` then (see
    [iCloud Drive](#icloud-drive)).
 6. Ruby versions installed **before** this ran don't have `ruby-lsp` yet
    (Neovim's Ruby language server). Install it once in each:
@@ -76,7 +77,7 @@ has reset a config file and dropped an include line.
 | `install-wifi.sh` | Adds the Wi-Fi networks kept in 1Password to this machine, with `wifi-sync pull` from omarchy-dotfiles, and starts `wifi-sync.service`, which saves a newly joined network there. Needs the 1Password app signed in and its CLI integration turned on; says so and goes on otherwise. |
 | `install-brainfm.sh` | Brain.fm in the bar: clones my player ([brainfm-tui](https://github.com/sschuez/brainfm-tui), a private repo) to `~/Code/brainfm-tui` and runs its installer, which sets up the `brainfm` command and the bar panel. Installs `mpv-mpris` so the media keys control it. Needs GitHub to know who you are (`gh auth login`); says so and skips otherwise. |
 | `install-google-drive.sh` | Google Drive as the folder `~/GoogleDrive`: installs rclone, signs in to Google once per machine (in the browser), mounts the folder (My Drive and the shared drives) now and at every login, and adds it to the Files sidebar. Needs the 1Password app signed in (my Google API client is kept there); says so and skips otherwise. See [Google Drive](#google-drive). |
-| `install-icloud-drive.sh` | iCloud Drive as the folder `~/iCloudDrive`, the same way: signs in to Apple once per machine (in the terminal: Apple ID, password, a code from the iPhone), mounts the folder now and at every login, and adds it to the Files sidebar. See [iCloud Drive](#icloud-drive). |
+| `install-icloud-drive.sh` | iCloud Drive as the folder `~/iCloudDrive`, the same way: signs in to Apple in the terminal (Apple ID, password, a code from the iPhone), mounts the folder now and at every login, and adds it to the Files sidebar. Apple's sign-in lasts 30 days: a notification then runs it again when clicked, for a new code. See [iCloud Drive](#icloud-drive). |
 
 ## How the overrides work
 
@@ -210,15 +211,26 @@ elsewhere, so a file added on the iPhone shows up within 5 minutes.
 - **The Apple account has to allow it:** Advanced Data Protection off, and
   "Access iCloud Data on the Web" on (iPhone: Settings > your name > iCloud).
   Otherwise Apple refuses the sign-in.
-- **The sign-in** happens in the terminal, once per machine: Apple ID,
-  password, then the code the iPhone shows. It stays in
-  `~/.config/rclone/rclone.conf`, as the rclone remote `icloud`.
-- **It runs out every few weeks.** The folder then shows errors, and
-  `journalctl --user -u rclone-icloud -e` mentions authentication. Run
-  `rclone config reconnect icloud:` (password and code again), then
-  `systemctl --user restart rclone-icloud`.
-- Signed in to the wrong account: `rclone config delete icloud`, then the
-  script again.
+- **The sign-in** happens in the terminal: Apple ID, password, then the code
+  the iPhone shows. It stays in `~/.config/rclone/rclone.conf`, as the rclone
+  remote `icloud`, and that includes the Apple ID password: rclone needs it at
+  every start and keeps it obscured, not encrypted, so whoever can read that
+  file can get it back. The file is readable by me only, on an encrypted disk.
+- **It lasts 30 days.** The sign-in is checked before every mount and every
+  hour after that (`icloud-signin-check` and `rclone-icloud-check.timer` in
+  omarchy-dotfiles). Once Apple refuses it, the folder is unmounted and a
+  notification says so. Click it, or run the script again: it asks for a new
+  code only, and remounts. An empty `~/iCloudDrive` is not the place to save
+  anything: what's in it is hidden once iCloud is mounted again.
+
+If something goes wrong:
+
+- `systemctl --user status rclone-icloud` shows whether it's mounted, and
+  `journalctl --user -u rclone-icloud -e` why not.
+- Signed in to the wrong account, or the Apple ID password has changed:
+  `rclone config delete icloud`, then the script again.
+- `systemctl --user disable rclone-icloud` also removes the unit's link, as
+  for Google Drive.
 
 ## Adding things
 
