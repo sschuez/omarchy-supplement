@@ -281,9 +281,10 @@ infomaniak-keys ~/Downloads/<the project's openrc file>
 
 It asks for the project user's password without showing it, checks it, makes
 an application credential and an S3 key pair of the project and saves each in
-1Password, never on the screen. A key already there is skipped, and a key it
-made but couldn't save is deleted again. Both come from the password's session
-because Keystone mints neither from a session that signed in with an
+1Password, never on the screen, then signs in with both from 1Password to show
+they work. A key already there is skipped; an empty item or an unsaved
+credential an earlier run left is replaced. Both come from the password's
+session because Keystone mints neither from a session that signed in with an
 application credential.
 
 ## Adding things
