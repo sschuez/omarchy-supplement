@@ -113,6 +113,11 @@ fullscreen mode draws on the alternate screen, so Herdr or tmux copy mode
 (`prefix [`) can't scroll back through a Claude Code session. If `/tui` turns
 it back on, re-run the script. It also enables the cloned workspaces bar widget.
 
+It installs my Claude Code mods, from the folder `claude-mods` in
+omarchy-dotfiles, which is a plugin marketplace of its own: `/context-bar`
+toggles the context window as a stacked bar above the prompt. Claude Code reads
+them from that folder, so an edit there takes effect with `/reload-plugins`.
+
 Last, it installs my [Window Overview](https://github.com/sschuez/omarchy-window-overview)
 shell plugin (`Super+E`, `Alt+Tab`) with `omarchy plugin add` and enables it.
 The plugin lives in its own repo; its keys are in omarchy-dotfiles' Hyprland

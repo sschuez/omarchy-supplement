@@ -8,7 +8,8 @@
 #   its daemon
 # - my Herdr plugins (Ctrl+h/j/k/l navigation, tab names) registered with Herdr
 # - Claude Code hooks merged into ~/.claude/settings.json, and its fullscreen
-#   renderer switched off
+#   renderer switched off, and my mods (claude-mods in omarchy-dotfiles)
+#   installed
 # Safe to re-run.
 set -e
 
@@ -175,4 +176,23 @@ if cmp -s "$tmp" "$CLAUDE_SETTINGS"; then
   echo "Already set up: $CLAUDE_SETTINGS"; rm "$tmp"
 else
   cat "$tmp" >"$CLAUDE_SETTINGS"; rm "$tmp"; echo "Updated Claude Code settings in $CLAUDE_SETTINGS"
+fi
+
+# Claude Code mods: the folder claude-mods in omarchy-dotfiles is a plugin
+# marketplace of its own (not a Stow package). Installed from that folder,
+# Claude Code reads each mod in place, so an edit there takes effect with
+# /reload-plugins. Installing again does nothing. Failures here (Claude Code
+# not installed yet) don't stop the rest of this script.
+#   context-bar  /context-bar: the context window as a stacked bar above the
+#                prompt, a colour per category as /context draws them
+if ! command -v claude >/dev/null 2>&1; then
+  echo "Claude Code isn't installed; skipping its mods"
+else
+  for claude_mod in context-bar; do
+    if claude plugin install "$claude_mod" --marketplace "$HOME/Code/omarchy-dotfiles/claude-mods" >/dev/null 2>&1; then
+      echo "Installed: Claude Code mod $claude_mod"
+    else
+      echo "Could not install the Claude Code mod $claude_mod; run this script again" >&2
+    fi
+  done
 fi
