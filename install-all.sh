@@ -11,6 +11,7 @@ bash ./install-stow.sh
 bash ./install-postgres.sh
 bash ./install-1password-cli.sh
 bash ./install-cloud-clis.sh
+bash ./install-ngrok.sh
 
 # dotfiles and overrides
 bash ./install-dotfiles.sh
